@@ -1,0 +1,48 @@
+version: '3'
+
+services: 
+  postgres:
+    image: 'postgres:alpine'
+    container_name: postgres
+    environment:
+      POSTGRES_USER: 'postgres'
+      POSTGRES_PASSWORD: 'postgres'
+    ports:
+      - '5432:5432'
+    restart: always
+    networks:
+      - serasatest
+
+  memcached:
+    container_name: memcached
+    image: memcached:latest
+    ports:
+      - "11211:11211"
+    networks:
+      - serasatest
+    restart: always
+  
+  webapp:
+    container_name: userapp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+      port: 8080
+    ports:
+      - '8080:8080'
+    depends_on: 
+      - postgres
+      - memcached
+    links: 
+      - postgres
+      - memcached
+    expose:
+      - 8080
+    networks:
+      - serasatest
+    restart: always
+
+networks:
+  serasatest:
+    name: serasatest
